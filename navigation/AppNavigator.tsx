@@ -12,6 +12,8 @@ import Login from "../components/Login";
 import HomeScreen from "../components/HomePage";
 import { CartProvider } from "../context/CartContext";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
+import CheckoutScreen from "../screens/CheckoutScreen";
+import { PaymentConfirmationScreen } from "../screens/PaymentConfirmationScreen";
 
 // Định nghĩa kiểu cho dữ liệu người dùng
 interface UserData {
@@ -32,6 +34,8 @@ type DrawerParamList = {
   CandleList: undefined;
   DetailCandle: undefined;
   CartScreen: undefined;
+  CheckoutScreen: undefined;
+  PaymentConfirmation: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -94,6 +98,8 @@ const MainDrawer = () => {
       <Drawer.Screen name="CandleList" component={CandleList} options={{ title: "Danh sách nến" }} />
       <Drawer.Screen name="DetailCandle" component={DetailCandle} options={{ title: "Chi tiết nến" }} />
       <Drawer.Screen name="CartScreen" component={CartScreen} options={{ title: "Giỏ hàng" }} />
+      <Drawer.Screen name="CheckoutScreen" component={CheckoutScreen} options={{ title: "Kiểm tra đơn hàng" }} />
+      <Drawer.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} options={{ title: "Thông tin đơn hàng" }} />
     </Drawer.Navigator>
   );
 };
