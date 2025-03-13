@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,16 @@ const CartScreen = () => {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const navigation = useNavigation();
 
+  // State để lưu trạng thái checkbox cho mỗi sản phẩm
+  const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
+
+  const toggleCheck = (id: number) => {
+    setCheckedItems((prev) => ({
+      ...prev,
+      [id]: !prev[id], // Đảo trạng thái checkbox
+    }));
+  };
+
   const renderItem = ({
     item,
   }: {
@@ -29,13 +39,21 @@ const CartScreen = () => {
     };
   }) => (
     <View style={styles.cartItem}>
-      <View style={styles.imageContainer}>
-        <Image
-          resizeMode="contain"
-          source={{ uri: item.image }}
-          style={styles.productImage}
+      {/* Checkbox */}
+      <TouchableOpacity onPress={() => toggleCheck(item.id)} style={styles.checkbox}>
+        <Ionicons
+          name={checkedItems[item.id] ? "checkbox" : "square-outline"}
+          size={24}
+          color={checkedItems[item.id] ? "#007bff" : "#6c757d"}
         />
+      </TouchableOpacity>
+
+      {/* Hình ảnh sản phẩm */}
+      <View style={styles.imageContainer}>
+        <Image resizeMode="contain" source={{ uri: item.image }} style={styles.productImage} />
       </View>
+
+      {/* Thông tin sản phẩm */}
       <View style={styles.productDetail}>
         <View style={styles.productHeader}>
           <Text style={styles.productName}>{item.name}</Text>
@@ -45,9 +63,7 @@ const CartScreen = () => {
         </View>
         <Text style={styles.productDescription}>Mô tả sản phẩm</Text>
         <View style={styles.PriceQuantityContainer}>
-          <Text style={styles.productPrice}>
-            Giá: {item.price.toLocaleString()} VND
-          </Text>
+          <Text style={styles.productPrice}>Giá: {item.price.toLocaleString()} VND</Text>
           <View style={styles.quantityContainer}>
             <TouchableOpacity
               onPress={() => {
@@ -59,8 +75,7 @@ const CartScreen = () => {
             <Text style={styles.quantityText}>{item.quantity}</Text>
             <TouchableOpacity
               onPress={() => {
-                if (item.quantity < item.stock)
-                  updateQuantity(item.id, item.quantity + 1);
+                if (item.quantity < item.stock) updateQuantity(item.id, item.quantity + 1);
               }}
             >
               <Ionicons name="add-circle-outline" size={24} color="#007bff" />
@@ -71,19 +86,17 @@ const CartScreen = () => {
     </View>
   );
 
-  const totalPrice = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  // const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = cart.reduce((sum, item) => {
+    return checkedItems[item.id] ? sum + item.price * item.quantity : sum;
+  }, 0);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Shopping Cart</Text>
       </View>
 
-      {/* Cart Items */}
       {cart.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Giỏ hàng của bạn đang trống!</Text>
@@ -97,14 +110,22 @@ const CartScreen = () => {
             contentContainerStyle={styles.listContainer}
           />
 
-          {/* Total Price */}
           <View style={styles.totalContainer}>
             <Text style={styles.totalText}>Tổng cộng:</Text>
-            <Text style={styles.totalPrice}>{totalPrice.toLocaleString()} VND</Text>
+            <Text style={styles.totalPrice}>
+              {totalPrice.toLocaleString()} VND
+            </Text>
           </View>
 
-          {/* Checkout Button */}
-          <TouchableOpacity style={styles.checkoutButton}>
+          <TouchableOpacity
+            style={styles.checkoutButton}
+            onPress={() => {
+              const selectedProducts = cart.filter(
+                (item) => checkedItems[item.id]
+              );
+              navigation.navigate("CheckoutScreen", { selectedProducts });
+            }}
+          >
             <Text style={styles.checkoutText}>Thanh toán</Text>
           </TouchableOpacity>
         </>
@@ -132,14 +153,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#343a40",
   },
-  deleteButton: {
-    color: "#ffffff",
-    fontSize: 20,
-    fontWeight: "bold",
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#007bff",
-  },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
@@ -156,11 +169,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#ffffff",
-    justifyContent: "space-between",
     borderBottomWidth: 1,
     borderBlockColor: "#dee2e6",
     marginBottom: 10,
     paddingVertical: 10,
+  },
+  checkbox: {
+    marginRight: 10,
   },
   imageContainer: {
     width: 100,

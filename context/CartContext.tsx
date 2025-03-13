@@ -16,6 +16,7 @@ interface CartContextType {
   addToCart: (item: CartItem) => void;
   updateQuantity: (id: number, quantity: number) => void;
   removeFromCart: (id: number) => void;
+  removeSelectedItems: (selectedProducts: CartItem[]) => void;
 }
 
 // Create the Cart Context
@@ -50,10 +51,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const removeFromCart = (id: number) => {
     setCart((prevCart) => prevCart.filter((cartItem) => cartItem.id !== id));
   };
+  
+  // Hàm mới để xóa các sản phẩm đã tick
+  const removeSelectedItems = (selectedProducts: CartItem[]) => {
+    setCart((prevCart) =>
+      prevCart.filter((cartItem) =>
+        !selectedProducts.some((item) => item.id === cartItem.id)
+      )
+    );
+  };
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, updateQuantity, removeFromCart }}
+      value={{ cart, addToCart, updateQuantity, removeFromCart, removeSelectedItems }}
     >
       {children}
     </CartContext.Provider>
