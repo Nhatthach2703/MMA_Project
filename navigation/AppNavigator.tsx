@@ -27,6 +27,9 @@ interface UserData {
 type RootStackParamList = {
   Login: undefined;
   Main: undefined;
+  DetailCandle: undefined;
+  CheckoutScreen: undefined;
+  PaymentConfirmation: undefined;
 };
 
 type DrawerParamList = {
