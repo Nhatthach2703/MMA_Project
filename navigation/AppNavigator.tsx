@@ -28,6 +28,7 @@ type RootStackParamList = {
   Login: undefined;
   Main: undefined;
   DetailCandle: undefined;
+  CartScreen: undefined;
   CheckoutScreen: undefined;
   PaymentConfirmation: undefined;
 };
@@ -100,6 +101,9 @@ const MainDrawer = () => {
       <Drawer.Screen name="Home" component={HomeScreen} options={{ title: "Trang chủ" }} />
       <Drawer.Screen name="CandleList" component={CandleList} options={{ title: "Danh sách nến" }} />
       <Drawer.Screen name="CartScreen" component={CartScreen} options={{ title: "Giỏ hàng" }} />
+      <Drawer.Screen name="CheckoutScreen" component={CheckoutScreen} options={{ drawerItemStyle: { display: 'none' } }} />
+      <Drawer.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} options={{ drawerItemStyle: { display: 'none' } }} />
+      <Drawer.Screen name="DetailCandle" component={DetailCandle} options={{ drawerItemStyle: { display: 'none' } }} />
     </Drawer.Navigator>
   );
 };
@@ -147,6 +151,7 @@ const AppNavigator = () => {
             </Stack.Screen>
             <Stack.Screen name="Main" component={MainDrawer} />
             <Stack.Screen name="DetailCandle" component={DetailCandle} />
+            <Stack.Screen name="CartScreen" component={CartScreen} />
             <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
             <Stack.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} />
           </Stack.Navigator>

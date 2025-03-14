@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { useCart } from "../context/CartContext"; // Import context
+import { Ionicons } from "@expo/vector-icons/build/Icons";
 
 const CheckoutScreen: React.FC = () => {
   const route = useRoute();
@@ -52,6 +53,11 @@ const CheckoutScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      {/* <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#343a40" />
+        </TouchableOpacity>
+      </View> */}
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.cartContainer}>
           {selectedProducts.map((item) => (
@@ -88,6 +94,17 @@ const CheckoutScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8f8f8", padding: 20 },
   scrollContainer: {  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    // marginBottom: 10,
+    // marginTop: 10,
+    width: "100%",
+  },
+  backButton: {
+    marginRight: 5,
+  },
   cartContainer: { marginBottom: 20 },
   cartItem: {
     flexDirection: "row",

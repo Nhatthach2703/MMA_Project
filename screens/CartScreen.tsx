@@ -93,9 +93,11 @@ const CartScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Shopping Cart</Text>
-      </View>
+      {/* <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#343a40" />
+        </TouchableOpacity>
+      </View> */}
 
       {cart.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -144,9 +146,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
-    marginTop: 10,
+    // marginBottom: 10,
+    // marginTop: 10,
     width: "100%",
+  },
+  backButton: {
+    marginRight: 5,
   },
   headerTitle: {
     fontSize: 20,
