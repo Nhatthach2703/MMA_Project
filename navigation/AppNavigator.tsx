@@ -96,10 +96,7 @@ const MainDrawer = () => {
     >
       <Drawer.Screen name="Home" component={HomeScreen} options={{ title: "Trang chủ" }} />
       <Drawer.Screen name="CandleList" component={CandleList} options={{ title: "Danh sách nến" }} />
-      <Drawer.Screen name="DetailCandle" component={DetailCandle} options={{ title: "Chi tiết nến" }} />
       <Drawer.Screen name="CartScreen" component={CartScreen} options={{ title: "Giỏ hàng" }} />
-      <Drawer.Screen name="CheckoutScreen" component={CheckoutScreen} options={{ title: "Kiểm tra đơn hàng" }} />
-      <Drawer.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} options={{ title: "Thông tin đơn hàng" }} />
     </Drawer.Navigator>
   );
 };
@@ -146,6 +143,9 @@ const AppNavigator = () => {
               {(props) => <Login {...props} onLoginSuccess={handleLoginSuccess} />}
             </Stack.Screen>
             <Stack.Screen name="Main" component={MainDrawer} />
+            <Stack.Screen name="DetailCandle" component={DetailCandle} />
+            <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
+            <Stack.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </CartProvider>
