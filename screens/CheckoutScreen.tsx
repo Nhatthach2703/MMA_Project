@@ -53,11 +53,11 @@ const CheckoutScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* <View style={styles.header}>
+      <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#343a40" />
         </TouchableOpacity>
-      </View> */}
+      </View>
       <ScrollView style={styles.scrollContainer}>
         <View style={styles.cartContainer}>
           {selectedProducts.map((item) => (

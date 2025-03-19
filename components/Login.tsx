@@ -27,7 +27,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, navigation }) => {
 
     try {
       console.log('Gửi yêu cầu đăng nhập:', { email, password });
-      const response = await fetch('http://10.12.66.15:3000/api/auth/login', {
+      const response = await fetch('http://10.12.65.96:3000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

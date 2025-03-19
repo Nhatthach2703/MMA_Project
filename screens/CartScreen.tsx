@@ -38,52 +38,71 @@ const CartScreen = () => {
       quantity: number;
     };
   }) => (
-    <View style={styles.cartItem}>
-      {/* Checkbox */}
-      <TouchableOpacity onPress={() => toggleCheck(item.id)} style={styles.checkbox}>
-        <Ionicons
-          name={checkedItems[item.id] ? "checkbox" : "square-outline"}
-          size={24}
-          color={checkedItems[item.id] ? "#007bff" : "#6c757d"}
-        />
-      </TouchableOpacity>
+    <TouchableOpacity
+      onPress={() => navigation.navigate("DetailCandle", { item })}
+    >
+      <View style={styles.cartItem}>
+        {/* Checkbox */}
+        <TouchableOpacity
+          onPress={() => toggleCheck(item.id)}
+          style={styles.checkbox}
+        >
+          <Ionicons
+            name={checkedItems[item.id] ? "checkbox" : "square-outline"}
+            size={24}
+            color={checkedItems[item.id] ? "#007bff" : "#6c757d"}
+          />
+        </TouchableOpacity>
 
-      {/* Hình ảnh sản phẩm */}
-      <View style={styles.imageContainer}>
-        <Image resizeMode="contain" source={{ uri: item.image }} style={styles.productImage} />
-      </View>
-
-      {/* Thông tin sản phẩm */}
-      <View style={styles.productDetail}>
-        <View style={styles.productHeader}>
-          <Text style={styles.productName}>{item.name}</Text>
-          <TouchableOpacity onPress={() => removeFromCart(item.id)}>
-            <Ionicons name="trash-outline" size={24} color="red" />
-          </TouchableOpacity>
+        {/* Hình ảnh sản phẩm */}
+        <View style={styles.imageContainer}>
+          <Image
+            resizeMode="contain"
+            source={{ uri: item.image }}
+            style={styles.productImage}
+          />
         </View>
-        <Text style={styles.productDescription}>Mô tả sản phẩm</Text>
-        <View style={styles.PriceQuantityContainer}>
-          <Text style={styles.productPrice}>Giá: {item.price.toLocaleString()} VND</Text>
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                if (item.quantity > 1) updateQuantity(item.id, item.quantity - 1);
-              }}
-            >
-              <Ionicons name="remove-circle-outline" size={24} color="#007bff" />
+
+        {/* Thông tin sản phẩm */}
+        <View style={styles.productDetail}>
+          <View style={styles.productHeader}>
+            <Text style={styles.productName}>{item.name}</Text>
+            <TouchableOpacity onPress={() => removeFromCart(item.id)}>
+              <Ionicons name="trash-outline" size={24} color="red" />
             </TouchableOpacity>
-            <Text style={styles.quantityText}>{item.quantity}</Text>
-            <TouchableOpacity
-              onPress={() => {
-                if (item.quantity < item.stock) updateQuantity(item.id, item.quantity + 1);
-              }}
-            >
-              <Ionicons name="add-circle-outline" size={24} color="#007bff" />
-            </TouchableOpacity>
+          </View>
+          <Text style={styles.productDescription}>Mô tả sản phẩm</Text>
+          <View style={styles.PriceQuantityContainer}>
+            <Text style={styles.productPrice}>
+              Giá: {item.price.toLocaleString()} VND
+            </Text>
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity
+                onPress={() => {
+                  if (item.quantity > 1)
+                    updateQuantity(item.id, item.quantity - 1);
+                }}
+              >
+                <Ionicons
+                  name="remove-circle-outline"
+                  size={24}
+                  color="#007bff"
+                />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{item.quantity}</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  if (item.quantity < item.stock)
+                    updateQuantity(item.id, item.quantity + 1);
+                }}
+              >
+                <Ionicons name="add-circle-outline" size={24} color="#007bff" />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   // const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -93,11 +112,14 @@ const CartScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#343a40" />
         </TouchableOpacity>
-      </View> */}
+      </View>
 
       {cart.length === 0 ? (
         <View style={styles.emptyContainer}>
