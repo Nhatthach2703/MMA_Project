@@ -9,28 +9,33 @@ import CandleList from "../components/CandleList";
 import DetailCandle from "../components/DetailCandle";
 import CartScreen from "../screens/CartScreen";
 import Login from "../components/Login";
+import Register from "../components/Register";
+import ProfileScreen from "../components/ProfileScreen";
 import HomeScreen from "../components/HomePage";
-import { CartProvider } from "../context/CartContext";
+import { CartProvider, useCart } from "../context/CartContext";
 import { DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import CheckoutScreen from "../screens/CheckoutScreen";
 import { PaymentConfirmationScreen } from "../screens/PaymentConfirmationScreen";
+import { Ionicons } from "@expo/vector-icons";
 
-// Định nghĩa kiểu cho dữ liệu người dùng
 interface UserData {
   name: string;
   email: string;
   phone: string;
   dob: string;
+  adress?: string;
   avatar?: string;
 }
 
 type RootStackParamList = {
-  Login: undefined;
+  Login: { email?: string };
   Main: undefined;
   DetailCandle: undefined;
   CartScreen: undefined;
   CheckoutScreen: undefined;
   PaymentConfirmation: undefined;
+  Profile: undefined;
+  Register: undefined;
 };
 
 type DrawerParamList = {
@@ -40,12 +45,12 @@ type DrawerParamList = {
   CartScreen: undefined;
   CheckoutScreen: undefined;
   PaymentConfirmation: undefined;
+  Profile: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Drawer = createDrawerNavigator<DrawerParamList>();
 
-// Custom Drawer Content
 const CustomDrawerContent = (props: any) => {
   const [userName, setUserName] = useState<string | null>(null);
 
@@ -91,16 +96,38 @@ const CustomDrawerContent = (props: any) => {
   );
 };
 
-// Drawer Navigator
 const MainDrawer = () => {
+  const { cart } = useCart(); // Lấy cart từ CartContext
+  const cartItemCount = cart.length; // Số lượng sản phẩm trong giỏ hàng
+
   return (
     <Drawer.Navigator
       initialRouteName="Home"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        drawerIcon: ({ color, size }) => (
+          <Ionicons name="menu" size={size} color={color} />
+        ),
+      }}
     >
       <Drawer.Screen name="Home" component={HomeScreen} options={{ title: "Trang chủ" }} />
       <Drawer.Screen name="CandleList" component={CandleList} options={{ title: "Danh sách nến" }} />
-      <Drawer.Screen name="CartScreen" component={CartScreen} options={{ title: "Giỏ hàng" }} />
+      <Drawer.Screen
+        name="CartScreen"
+        component={CartScreen}
+        options={{
+          title: "Giỏ hàng",
+          drawerIcon: ({ color, size }) => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Ionicons name="cart-outline" size={size} color={color} />
+              <View style={drawerStyles.badge}>
+                <Text style={drawerStyles.badgeText}>{cartItemCount}</Text>
+              </View>
+            </View>
+          ),
+        }}
+      />
+      <Drawer.Screen name="Profile" component={ProfileScreen} options={{ title: "Hồ sơ cá nhân" }} />
       <Drawer.Screen name="CheckoutScreen" component={CheckoutScreen} options={{ drawerItemStyle: { display: 'none' } }} />
       <Drawer.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} options={{ drawerItemStyle: { display: 'none' } }} />
       <Drawer.Screen name="DetailCandle" component={DetailCandle} options={{ drawerItemStyle: { display: 'none' } }} />
@@ -146,14 +173,17 @@ const AppNavigator = () => {
             initialRouteName={isLoggedIn ? "Main" : "Login"}
             screenOptions={{ headerShown: false }}
           >
-            <Stack.Screen name="Login">
-              {(props) => <Login {...props} onLoginSuccess={handleLoginSuccess} />}
-            </Stack.Screen>
+            <Stack.Screen
+              name="Login"
+              component={(props) => <Login {...props} onLoginSuccess={handleLoginSuccess} />}
+            />
+            <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="Main" component={MainDrawer} />
             <Stack.Screen name="DetailCandle" component={DetailCandle} />
             <Stack.Screen name="CartScreen" component={CartScreen} />
             <Stack.Screen name="CheckoutScreen" component={CheckoutScreen} />
             <Stack.Screen name="PaymentConfirmation" component={PaymentConfirmationScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </CartProvider>
@@ -161,7 +191,6 @@ const AppNavigator = () => {
   );
 };
 
-// Styles cho Drawer
 const drawerStyles = StyleSheet.create({
   header: {
     padding: 20,
@@ -174,7 +203,7 @@ const drawerStyles = StyleSheet.create({
     color: '#333',
   },
   logoutButton: {
-    padding: 15, // Sửa lỗi cú pháp: xóa "x``"
+    padding: 15,
     backgroundColor: '#ff9800',
     margin: 10,
     borderRadius: 5,
@@ -182,6 +211,20 @@ const drawerStyles = StyleSheet.create({
   logoutText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
+  },
+  badge: {
+    backgroundColor: 'red',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 5,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
     fontWeight: 'bold',
   },
 });

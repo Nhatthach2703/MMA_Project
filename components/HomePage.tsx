@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
-
+import Config from './config';
 interface Candle {
   id: number;
   name: string;
@@ -39,7 +39,7 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     const fetchCandles = async () => {
       try {
-        const response = await fetch('http://192.168.1.94:3000/api/product', {
+        const response = await fetch(`${Config.API_BASE_URL}/api/product`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -88,7 +88,7 @@ const HomeScreen = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-          <Ionicons name="person" size={28} color="black" /> {/* Thay "menu" thành "person" */}
+          <Ionicons name="person" size={28} color="black" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Candle Store</Text>
         <TouchableOpacity onPress={() => Alert.alert("Notifications", "You have new messages!")}>
