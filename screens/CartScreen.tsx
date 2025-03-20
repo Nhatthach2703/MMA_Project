@@ -134,24 +134,26 @@ const CartScreen = () => {
             contentContainerStyle={styles.listContainer}
           />
 
-          <View style={styles.totalContainer}>
-            <Text style={styles.totalText}>Tổng cộng:</Text>
-            <Text style={styles.totalPrice}>
-              {totalPrice.toLocaleString()} VND
-            </Text>
-          </View>
+          <View style={styles.footer}>
+            <View style={styles.totalContainer}>
+              <Text style={styles.totalText}>Tổng cộng:</Text>
+              <Text style={styles.totalPrice}>
+                {totalPrice.toLocaleString()} VND
+              </Text>
+            </View>
 
-          <TouchableOpacity
-            style={styles.checkoutButton}
-            onPress={() => {
-              const selectedProducts = cart.filter(
-                (item) => checkedItems[item.id]
-              );
-              navigation.navigate("CheckoutScreen", { selectedProducts });
-            }}
-          >
-            <Text style={styles.checkoutText}>Thanh toán</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.checkoutButton}
+              onPress={() => {
+                const selectedProducts = cart.filter(
+                  (item) => checkedItems[item.id]
+                );
+                navigation.navigate("CheckoutScreen", { selectedProducts });
+              }}
+            >
+              <Text style={styles.checkoutText}>Thanh toán</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
     </SafeAreaView>
@@ -162,7 +164,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fdfdfd",
-    padding: 20,
+    // padding: 20,
   },
   header: {
     flexDirection: "row",
@@ -190,6 +192,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingBottom: 20,
+    paddingHorizontal: 20
   },
   cartItem: {
     flexDirection: "row",
@@ -289,6 +292,16 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 18,
     fontWeight: "800",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: "#dee2e6",
   },
 });
 

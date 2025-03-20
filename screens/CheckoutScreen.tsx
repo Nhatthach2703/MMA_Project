@@ -123,7 +123,7 @@ const CheckoutScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chi tiết thanh toán</Text>
-          <View style={styles.summaryRow}> <Text>Tổng giá trị sản phẩm:</Text> <Text>{productTotal.toLocaleString()} VND</Text></View>
+          <View style={styles.summaryRow}> <Text>Tổng giá trị sản phẩm:</Text><Text>{productTotal.toLocaleString()} VND</Text></View>
           {/* <View style={styles.summaryRow}><Text>Tổng sản phẩm:</Text><Text>{selectedProducts.length}</Text></View> */}
           <View style={styles.summaryRow}><Text>Phí vận chuyển:</Text><Text>{shippingFee.toLocaleString()} VND</Text></View>
           <View style={styles.summaryRow}><Text>Giảm giá:</Text><Text>-{selectedVoucher.toLocaleString()} VND</Text></View>
@@ -150,7 +150,7 @@ const CheckoutScreen: React.FC = () => {
                 }}
               >
                 <Text style={styles.voucherCode}>{voucher.code}</Text>
-                <Text>{voucher.description}</Text>
+                <Text>{voucher.description || "Không có mô tả"}</Text>
               </TouchableOpacity>
             ))}
             <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
