@@ -166,11 +166,10 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    // marginBottom: 10,
-    // marginTop: 10,
-    width: "100%",
+    padding: 15,
+    backgroundColor: "#fff",
+    elevation: 3,
   },
   backButton: {
     marginRight: 5,
