@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons/build/Icons";
@@ -7,6 +7,22 @@ const PaymentConfirmationScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { totalAmount } = route.params as { totalAmount: string };
+  const [orderId, setOrderId] = useState("");
+  const [orderDate, setOrderDate] = useState("");
+
+  useEffect(() => {
+    // Tạo mã đơn hàng ngẫu nhiên (6 chữ số)
+    const generateOrderId = () => Math.floor(100000 + Math.random() * 900000).toString();
+  
+    // Lấy ngày hiện tại
+    const getCurrentDate = () => {
+      const date = new Date();
+      return date.toLocaleDateString("vi-VN"); // Format ngày theo Việt Nam
+    };
+  
+    setOrderId(generateOrderId());
+    setOrderDate(getCurrentDate());
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -29,10 +45,10 @@ const PaymentConfirmationScreen: React.FC = () => {
           <Text style={styles.boldText}>3-5 ngày làm việc</Text>
         </Text>
         <Text style={styles.orderText}>
-          🆔 Mã đơn hàng: <Text style={styles.boldText}>123456</Text>
+          🆔 Mã đơn hàng: <Text style={styles.boldText}>{orderId}</Text>
         </Text>
         <Text style={styles.orderText}>
-          📅 Ngày đặt hàng: <Text style={styles.boldText}>01/01/2025</Text>
+          📅 Ngày đặt hàng: <Text style={styles.boldText}>{orderDate}</Text>
         </Text>
         <Text style={styles.orderTotal}>
           💰 Tổng cộng: <Text style={styles.boldText}>{totalAmount}</Text>
