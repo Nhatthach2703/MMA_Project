@@ -3,6 +3,7 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } fro
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Config from './config';
+
 interface UserData {
   name: string;
   email: string;
@@ -22,12 +23,73 @@ const Register: React.FC<RegisterProps> = ({ navigation }) => {
   const [dob, setDob] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const [dobError, setDobError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^[0-9]{10}$/; // Kiểm tra số điện thoại 10 chữ số
+    return phoneRegex.test(phone);
+  };
+
+  const validateDob = (dob: string) => {
+    const dobRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    return dobRegex.test(dob);
+  };
 
   const handleRegister = async () => {
-    if (!name || !email || !phone || !dob || !password) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
-      return;
+    let valid = true;
+    setNameError('');
+    setEmailError('');
+    setPhoneError('');
+    setDobError('');
+    setPasswordError('');
+
+    if (!name) {
+      setNameError('Họ và tên là bắt buộc');
+      valid = false;
     }
+
+    if (!email) {
+      setEmailError('Email là bắt buộc');
+      valid = false;
+    } else if (!validateEmail(email)) {
+      setEmailError('Định dạng email không hợp lệ');
+      valid = false;
+    }
+
+    if (!phone) {
+      setPhoneError('Số điện thoại là bắt buộc');
+      valid = false;
+    } else if (!validatePhone(phone)) {
+      setPhoneError('Số điện thoại phải có 10 chữ số');
+      valid = false;
+    }
+
+    if (!dob) {
+      setDobError('Ngày sinh là bắt buộc');
+      valid = false;
+    } else if (!validateDob(dob)) {
+      setDobError('Định dạng ngày sinh phải là DD/MM/YYYY');
+      valid = false;
+    }
+
+    if (!password) {
+      setPasswordError('Mật khẩu là bắt buộc');
+      valid = false;
+    } else if (password.length < 6) {
+      setPasswordError('Mật khẩu phải có ít nhất 6 ký tự');
+      valid = false;
+    }
+
+    if (!valid) return;
 
     const userData = { name, email, phone, dob, password };
 
@@ -40,23 +102,16 @@ const Register: React.FC<RegisterProps> = ({ navigation }) => {
         },
         body: JSON.stringify(userData),
       });
-      
-      console.log('Phản hồi từ server:', { status: response.status });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log('Dữ liệu lỗi:', errorData);
         throw new Error(errorData.message || 'Đăng ký không thành công');
       }
 
       const data: UserData = await response.json();
-      console.log('Dữ liệu trả về:', data);
-
       await AsyncStorage.setItem('userData', JSON.stringify(data));
-      console.log('Đã lưu userData vào AsyncStorage');
-
+      
       Alert.alert('Thành công', 'Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
-      // Chuyển hướng về Login và truyền email
       navigation.replace('Login', { email });
     } catch (error: any) {
       console.error('Lỗi khi đăng ký:', error);
@@ -75,60 +130,67 @@ const Register: React.FC<RegisterProps> = ({ navigation }) => {
         }}
       />
       <View style={styles.inputContainer}>
+        <Ionicons name="person-outline" size={24} color="#6c757d" style={styles.icon} />
         <TextInput
-          style={styles.inputField}
+          style={styles.input}
           placeholder="Họ và tên"
           value={name}
           onChangeText={setName}
         />
       </View>
+      {nameError ? <Text style={styles.errorText}>{nameError}</Text> : null}
+      
       <View style={styles.inputContainer}>
+        <Ionicons name="mail-outline" size={24} color="#6c757d" style={styles.icon} />
         <TextInput
-          style={styles.inputField}
+          style={styles.input}
           placeholder="Email"
           keyboardType="email-address"
           value={email}
-          Deportivo
           onChangeText={setEmail}
           autoCapitalize="none"
         />
       </View>
+      {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
+      
       <View style={styles.inputContainer}>
+        <Ionicons name="call-outline" size={24} color="#6c757d" style={styles.icon} />
         <TextInput
-          style={styles.inputField}
+          style={styles.input}
           placeholder="Số điện thoại"
           keyboardType="phone-pad"
           value={phone}
           onChangeText={setPhone}
         />
       </View>
+      {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+      
       <View style={styles.inputContainer}>
+        <Ionicons name="calendar-outline" size={24} color="#6c757d" style={styles.icon} />
         <TextInput
-          style={styles.inputField}
+          style={styles.input}
           placeholder="Ngày sinh (DD/MM/YYYY)"
           value={dob}
           onChangeText={setDob}
         />
       </View>
+      {dobError ? <Text style={styles.errorText}>{dobError}</Text> : null}
+      
       <View style={styles.inputContainer}>
+        <Ionicons name="lock-closed-outline" size={24} color="#6c757d" style={styles.icon} />
         <TextInput
-          style={styles.inputField}
+          style={styles.input}
           placeholder="Mật khẩu"
           secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={styles.iconContainer}
-        >
-          <Ionicons
-            name={showPassword ? "eye" : "eye-off"}
-            size={24}
-            color="#6c757d"
-          />
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+          <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={24} color="#6c757d" />
         </TouchableOpacity>
       </View>
+      {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+      
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Đăng ký</Text>
       </TouchableOpacity>
@@ -170,12 +232,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
-  inputField: {
+  input: {
     flex: 1,
-    padding: 10,
+    height: 40,
   },
-  iconContainer: {
-    padding: 10,
+  icon: {
+    marginRight: 8,
   },
   button: {
     backgroundColor: "#007bff",
@@ -188,6 +250,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    alignSelf: 'flex-start',
+    marginLeft: 10,
+    marginBottom: 10,
   },
 });
 
