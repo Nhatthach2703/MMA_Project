@@ -37,26 +37,25 @@ const CheckoutScreen: React.FC = () => {
     const fetchAddress = async () => {
       try {
         const userData = await AsyncStorage.getItem("userData");
-        console.log("Dữ liệu từ AsyncStorage:", userData);
-  
         if (!userData) {
           setShippingAddress("Không tìm thấy dữ liệu người dùng!");
           return;
         }
   
         const parsedData = JSON.parse(userData);
-        console.log("Dữ liệu sau khi parse:", parsedData);
-  
-        // Nếu không có address -> Gọi API lấy thông tin mới
         if (!parsedData.address && parsedData._id) {
           const response = await fetch(`${Config.API_BASE_URL}/api/auth/${parsedData._id}`);
-          if (!response.ok) {
-            throw new Error("Lỗi khi tải dữ liệu người dùng");
-          }
-          const data = await response.json();
-          // await AsyncStorage.setItem("userData", JSON.stringify(data)); // Cập nhật lại AsyncStorage
+          if (!response.ok) throw new Error("Lỗi khi tải dữ liệu người dùng");
   
-          setShippingAddress(data.address || "Chưa có địa chỉ, vui lòng cập nhật!");
+          const data = await response.json();
+          if (!data.address) {
+            setShippingAddress("Chưa có địa chỉ, vui lòng cập nhật!");
+            return;
+          }
+  
+          setShippingAddress(data.address);
+          parsedData.address = data.address;
+          await AsyncStorage.setItem("userData", JSON.stringify(parsedData));
         } else {
           setShippingAddress(parsedData.address);
         }
@@ -66,8 +65,9 @@ const CheckoutScreen: React.FC = () => {
       }
     };
   
-    fetchAddress();
-  }, []);
+    const unsubscribe = navigation.addListener("focus", fetchAddress);
+    return unsubscribe;
+  }, [navigation]);
   
 
   // const shippingFee = 20000;
