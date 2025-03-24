@@ -11,7 +11,9 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient';
 import Config from './config';
+
 interface Candle {
   id: number;
   name: string;
@@ -35,6 +37,21 @@ const HomeScreen = ({ navigation }) => {
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(true);
   const animatedValue = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const bannerTextFadeAnim = useRef(new Animated.Value(0)).current; // Animation mới cho chữ banner
+  const productSlideAnim = useRef(new Animated.Value(0)).current;
+
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const quoteFadeAnim = useRef(new Animated.Value(1)).current;
+  const quoteSlideAnim = useRef(new Animated.Value(0)).current;
+  const quotes = [
+    "Ánh sáng là sự bình yên trong tâm hồn.",
+    "Mỗi ngọn nến kể một câu chuyện riêng.",
+    "Thư giãn cùng hương thơm dịu nhẹ.",
+    "Tạo không gian ấm áp với nến thơm.",
+    "Nến thơm - Đánh thức giác quan.",
+  ];
 
   useEffect(() => {
     const fetchCandles = async () => {
@@ -45,11 +62,7 @@ const HomeScreen = ({ navigation }) => {
             'Content-Type': 'application/json',
           },
         });
-
-        if (!response.ok) {
-          throw new Error('Không thể lấy danh sách sản phẩm');
-        }
-
+        if (!response.ok) throw new Error('Không thể lấy danh sách sản phẩm');
         const data: Candle[] = await response.json();
         setCandles(data);
       } catch (error: any) {
@@ -62,26 +75,63 @@ const HomeScreen = ({ navigation }) => {
 
     fetchCandles();
 
+    // Animation cho tiêu đề
+    Animated.timing(fadeAnim, { toValue: 1, duration: 1000, useNativeDriver: true }).start();
+
+    // Animation cho chữ banner
+    Animated.timing(bannerTextFadeAnim, {
+      toValue: 1,
+      duration: 1500,
+      delay: 500,
+      useNativeDriver: true,
+    }).start();
+
+    // Animation cho carousel trích dẫn
+    const quoteInterval = setInterval(() => {
+      Animated.parallel([
+        Animated.timing(quoteFadeAnim, { toValue: 0, duration: 500, useNativeDriver: true }),
+        Animated.spring(quoteSlideAnim, { toValue: 20, tension: 40, friction: 7, useNativeDriver: true }),
+      ]).start(() => {
+        setCurrentQuoteIndex((prev) => (prev + 1) % quotes.length);
+        quoteSlideAnim.setValue(-20);
+        Animated.parallel([
+          Animated.timing(quoteFadeAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+          Animated.spring(quoteSlideAnim, { toValue: 0, tension: 40, friction: 7, useNativeDriver: true }),
+        ]).start();
+      });
+    }, 4000);
+
+    // Animation cho sản phẩm
     Animated.loop(
       Animated.sequence([
-        Animated.timing(animatedValue, {
-          toValue: 0,
+        Animated.timing(productSlideAnim, {
+          toValue: -150 * Math.min(candles.length, 3),
           duration: 5000,
           useNativeDriver: true,
         }),
-        Animated.timing(animatedValue, {
-          toValue: 1,
+        Animated.timing(productSlideAnim, {
+          toValue: 0,
           duration: 5000,
           useNativeDriver: true,
         }),
       ])
     ).start();
-  }, [animatedValue]);
+
+    return () => clearInterval(quoteInterval);
+  }, [animatedValue, fadeAnim, bannerTextFadeAnim, productSlideAnim, candles.length]);
 
   const translateX = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [100, -100],
   });
+
+  const handlePressIn = () => {
+    Animated.spring(scaleAnim, { toValue: 0.95, useNativeDriver: true }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
+  };
 
   return (
     <View style={styles.container}>
@@ -90,7 +140,10 @@ const HomeScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
           <Ionicons name="person" size={28} color="black" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Candle Store</Text>
+        <View style={styles.headerTitleContainer}>
+          <Ionicons name="flame" size={24} color="#ff9800" style={{ marginRight: 5 }} />
+          <Text style={styles.headerTitle}>Candle Store</Text>
+        </View>
         <TouchableOpacity onPress={() => Alert.alert("Notifications", "You have new messages!")}>
           <Ionicons name="notifications" size={28} color="black" />
           {notifications > 0 && (
@@ -103,39 +156,86 @@ const HomeScreen = ({ navigation }) => {
 
       {/* Main Content */}
       <ScrollView>
+        {/* Banner cải tiến */}
         <View style={styles.bannerContainer}>
           <Image
-            source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQaqzfFN4me8DRRjCcAo7t2yAX4m1MZlBd4rg&s" }}
+            source={{ uri: "https://muskokalifestyle.online/cdn/shop/files/muskoka-lifestyle-multi-candle-banner.jpg?v=1727163884&width=3840" }} // Ảnh nến đẹp hơn
             style={styles.banner}
           />
-          <Text style={styles.bannerText}>Welcome to the Candle Store</Text>
+          <LinearGradient
+            colors={['rgba(50,30,20,0.6)', 'rgba(200,134,66,0.3)', 'transparent']}
+            style={styles.gradientOverlay}
+          />
+          <Animated.Text style={[styles.bannerText, { opacity: bannerTextFadeAnim }]}>
+            Welcome to Candle Store
+          </Animated.Text>
+          
         </View>
 
         <View style={styles.featuredContainer}>
-          <Text style={styles.featuredTitle}>Featured Products</Text>
+          <Animated.Text style={[styles.featuredTitle, { opacity: fadeAnim }]}>
+            Featured Products
+          </Animated.Text>
           {loading ? (
             <Text style={styles.loadingText}>Đang tải sản phẩm...</Text>
           ) : candles.length === 0 ? (
             <Text style={styles.loadingText}>Không có sản phẩm nào</Text>
           ) : (
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {candles.map((candle) => (
-                <View key={candle.id} style={styles.productCard}>
-                  <Image source={{ uri: candle.image }} style={styles.productImage} />
-                  <Text style={styles.productName}>{candle.name}</Text>
-                  <Text style={styles.productPrice}>
-                    {candle.price.toLocaleString('vi-VN')} VND
-                  </Text>
-                </View>
-              ))}
+              <Animated.View
+                style={{
+                  flexDirection: 'row',
+                  transform: [{ translateX: productSlideAnim }],
+                }}
+              >
+                {candles.map((candle) => (
+                  <View key={candle.id} style={styles.productCard}>
+                    <Image source={{ uri: candle.image }} style={styles.productImage} />
+                    <Text style={styles.productName}>{candle.name}</Text>
+                    <Text style={styles.productPrice}>
+                      {candle.price.toLocaleString('vi-VN')} VND
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={() => Alert.alert("Thông báo", `Đã thêm ${candle.name} vào giỏ hàng!`)}
+                    >
+                      <Ionicons name="cart-outline" size={20} color="#ff9800" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </Animated.View>
             </ScrollView>
           )}
+          <LinearGradient
+            colors={['#fdf6e3', '#f5e6cc']}
+            style={styles.quoteContainer}
+          >
+            <Animated.Text
+              style={[
+                styles.quoteText,
+                {
+                  opacity: quoteFadeAnim,
+                  transform: [{ translateX: quoteSlideAnim }],
+                },
+              ]}
+            >
+              {quotes[currentQuoteIndex]}
+            </Animated.Text>
+            <Ionicons name="flame-outline" size={20} color="#c68642" style={styles.quoteIcon} />
+          </LinearGradient>
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("CandleList")}>
-        <Text style={styles.buttonText}>Explore Products</Text>
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("CandleList")}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+        >
+          <Text style={styles.buttonText}>Explore Products</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>© 2025 Candle Store. All rights reserved.</Text>
@@ -162,6 +262,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -170,27 +274,35 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     position: "relative",
+    marginBottom: 20,
   },
   banner: {
     width: "100%",
-    height: 200,
-    borderRadius: 10,
+    height: 240, // Tăng chiều cao cho sang trọng hơn
     resizeMode: "cover",
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '80%', // Gradient phủ rộng hơn
+    borderRadius: 20,
   },
   bannerText: {
     position: "absolute",
-    top: "30%",
+    top: "35%",
     left: "25%",
-    transform: [{ translateX: -50 }, { translateY: -10 }],
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#8B4513",
-    backgroundColor: "rgba(0, 0, 0, 0)",
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    transform: [{ translateX: -50 }],
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#f5e6cc",
+    textShadowColor: 'rgba(0, 0, 0, 0.6)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 4,
     textAlign: "center",
   },
+  
   notificationBadge: {
     position: "absolute",
     right: -5,
@@ -262,6 +374,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#ff9800",
   },
+  addButton: {
+    marginTop: 5,
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: "#fff3e0",
+  },
   footer: {
     width: "100%",
     alignItems: "center",
@@ -281,6 +399,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     color: "#888",
+  },
+  quoteContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  quoteText: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    fontWeight: '500',
+    color: '#8d5524',
+    textAlign: 'center',
+  },
+  quoteIcon: {
+    marginTop: 8,
   },
 });
 
