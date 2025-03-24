@@ -98,7 +98,26 @@ const CustomDrawerContent = (props: any) => {
 
 const MainDrawer = () => {
   const { cart } = useCart(); // Lấy cart từ CartContext
-  const cartItemCount = cart.length; // Số lượng sản phẩm trong giỏ hàng
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem("userData");
+        if (storedUserId) {
+          const parsedUser = JSON.parse(storedUserId);
+          setUserId(parsedUser._id); // Lấy ID người dùng từ UserData
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy UserData từ AsyncStorage:", error);
+      }
+    };
+    getUserId();
+  }, []);
+
+  // const cartItemCount = cart.length; // Số lượng sản phẩm trong giỏ hàng
+  const cartItemCount = cart.filter((item) => item.userId === userId).length; // Số lượng sản phẩm trong giỏ hàng
+  // console.log('cartItemCount:', cartItemCount);
 
   return (
     <Drawer.Navigator
