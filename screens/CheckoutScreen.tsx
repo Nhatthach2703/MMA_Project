@@ -13,35 +13,64 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { useCart } from "../context/CartContext";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Config from "../components/config";
 
 const CheckoutScreen: React.FC = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { removeSelectedItems } = useCart();
-  
-  const { selectedProducts = [] } = route.params as { selectedProducts?: any[] };
+
+  const { selectedProducts = [] } = route.params as {
+    selectedProducts?: any[];
+  };
   const [shippingAddress, setShippingAddress] = useState<string>("");
   const [selectedVoucher, setSelectedVoucher] = useState<number>(0);
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
+  const shippingOptions = [
+    { id: 1, name: "Giao hàng tiêu chuẩn", fee: 20000 },
+    { id: 2, name: "Giao hàng nhanh", fee: 35000 },
+    { id: 3, name: "Giao hàng siêu tốc", fee: 50000 },
+  ];
+  const [selectedShipping, setSelectedShipping] = useState(shippingOptions[0]);
 
   useEffect(() => {
     const fetchAddress = async () => {
       try {
         const userData = await AsyncStorage.getItem("userData");
-        if (userData) {
-          const parsedData = JSON.parse(userData);
-          setShippingAddress(parsedData.address || "Chưa có địa chỉ, vui lòng cập nhật!");
-        } else {
+        console.log("Dữ liệu từ AsyncStorage:", userData);
+  
+        if (!userData) {
           setShippingAddress("Không tìm thấy dữ liệu người dùng!");
+          return;
+        }
+  
+        const parsedData = JSON.parse(userData);
+        console.log("Dữ liệu sau khi parse:", parsedData);
+  
+        // Nếu không có address -> Gọi API lấy thông tin mới
+        if (!parsedData.address && parsedData._id) {
+          const response = await fetch(`${Config.API_BASE_URL}/api/auth/${parsedData._id}`);
+          if (!response.ok) {
+            throw new Error("Lỗi khi tải dữ liệu người dùng");
+          }
+          const data = await response.json();
+          // await AsyncStorage.setItem("userData", JSON.stringify(data)); // Cập nhật lại AsyncStorage
+  
+          setShippingAddress(data.address || "Chưa có địa chỉ, vui lòng cập nhật!");
+        } else {
+          setShippingAddress(parsedData.address);
         }
       } catch (error) {
+        console.error("Lỗi khi lấy địa chỉ:", error);
         setShippingAddress("Lỗi khi lấy địa chỉ!");
       }
     };
+  
     fetchAddress();
   }, []);
+  
 
-  const shippingFee = 20000;
+  // const shippingFee = 20000;
   const mockVouchers = [
     { id: 1, code: "DISCOUNT10", value: 10000, description: "Giảm 10.000 VND" },
     { id: 2, code: "SALE20", value: 20000, description: "Giảm 20.000 VND" },
@@ -53,20 +82,26 @@ const CheckoutScreen: React.FC = () => {
       (total, item) => total + item.price * item.quantity,
       0
     );
-    return productTotal + shippingFee - selectedVoucher;
+    return productTotal + selectedShipping.fee - selectedVoucher;
   };
 
   const handleConfirmPayment = () => {
-    Alert.alert("Xác nhận thanh toán", "Bạn có chắc chắn muốn thanh toán không?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Đồng ý",
-        onPress: () => {
-          removeSelectedItems(selectedProducts);
-          navigation.navigate("PaymentConfirmation", { totalAmount: calculateTotal() });
+    Alert.alert(
+      "Xác nhận thanh toán",
+      "Bạn có chắc chắn muốn thanh toán không?",
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Đồng ý",
+          onPress: () => {
+            removeSelectedItems(selectedProducts);
+            navigation.navigate("PaymentConfirmation", {
+              totalAmount: calculateTotal(),
+            });
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   const productTotal = selectedProducts.reduce(
@@ -77,7 +112,10 @@ const CheckoutScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
           <Ionicons name="arrow-back" size={24} color="#343a40" />
         </TouchableOpacity>
         {/* <Text style={styles.headerTitle}>Xác nhận đơn hàng</Text> */}
@@ -91,8 +129,12 @@ const CheckoutScreen: React.FC = () => {
               <Image source={{ uri: item.image }} style={styles.image} />
               <View style={styles.details}>
                 <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.price}>{item.price.toLocaleString()} VND</Text>
-                <Text style={styles.quantityText}>Số lượng: {item.quantity}</Text>
+                <Text style={styles.price}>
+                  {item.price.toLocaleString()} VND
+                </Text>
+                <Text style={styles.quantityText}>
+                  Số lượng: {item.quantity}
+                </Text>
               </View>
             </View>
           ))}
@@ -102,16 +144,40 @@ const CheckoutScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
           <View style={styles.addressContainer}>
             <Text style={styles.addressText}>{shippingAddress}</Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Profile")} style={styles.changeAddressButton}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Profile")}
+              style={styles.changeAddressButton}
+            >
               <Text style={styles.changeAddressText}>Thay đổi</Text>
             </TouchableOpacity>
           </View>
         </View>
 
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Chọn dịch vụ giao hàng</Text>
+          {shippingOptions.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={[
+                styles.shippingOption,
+                selectedShipping.id === option.id && styles.selectedShipping,
+              ]}
+              onPress={() => setSelectedShipping(option)}
+            >
+              <Text style={styles.shippingText}>
+                {option.name} - {option.fee.toLocaleString()} VND
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
         {/* Chọn mã giảm giá */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Mã giảm giá</Text>
-          <TouchableOpacity style={styles.voucherButton} onPress={() => setModalVisible(true)}>
+          <TouchableOpacity
+            style={styles.voucherButton}
+            onPress={() => setModalVisible(true)}
+          >
             <Text style={styles.voucherText}>
               {selectedVoucher > 0
                 ? `Giảm ${selectedVoucher.toLocaleString()} VND`
@@ -123,15 +189,35 @@ const CheckoutScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Chi tiết thanh toán</Text>
-          <View style={styles.summaryRow}> <Text>Tổng giá trị sản phẩm:</Text><Text>{productTotal.toLocaleString()} VND</Text></View>
+          <View style={styles.summaryRow}>
+            {" "}
+            <Text>Tổng giá trị sản phẩm:</Text>
+            <Text>{productTotal.toLocaleString()} VND</Text>
+          </View>
           {/* <View style={styles.summaryRow}><Text>Tổng sản phẩm:</Text><Text>{selectedProducts.length}</Text></View> */}
-          <View style={styles.summaryRow}><Text>Phí vận chuyển:</Text><Text>{shippingFee.toLocaleString()} VND</Text></View>
-          <View style={styles.summaryRow}><Text>Giảm giá:</Text><Text>-{selectedVoucher.toLocaleString()} VND</Text></View>
-          <View style={styles.totalContainer}><Text style={styles.totalText}>Tổng cộng:</Text><Text style={styles.totalPrice}>{calculateTotal().toLocaleString()} VND</Text></View>
+          <View style={styles.summaryRow}>
+            <Text>Phí vận chuyển:</Text>
+            <Text>
+              <Text>{selectedShipping.fee.toLocaleString()} VND</Text> VND
+            </Text>
+          </View>
+          <View style={styles.summaryRow}>
+            <Text>Giảm giá:</Text>
+            <Text>-{selectedVoucher.toLocaleString()} VND</Text>
+          </View>
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalText}>Tổng cộng:</Text>
+            <Text style={styles.totalPrice}>
+              {calculateTotal().toLocaleString()} VND
+            </Text>
+          </View>
         </View>
       </ScrollView>
 
-      <TouchableOpacity style={styles.checkoutButton} onPress={handleConfirmPayment}>
+      <TouchableOpacity
+        style={styles.checkoutButton}
+        onPress={handleConfirmPayment}
+      >
         <Text style={styles.checkoutText}>Xác nhận thanh toán</Text>
       </TouchableOpacity>
 
@@ -153,7 +239,10 @@ const CheckoutScreen: React.FC = () => {
                 <Text>{voucher.description || "Không có mô tả"}</Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={styles.closeButton}
+            >
               <Text style={styles.closeButtonText}>Đóng</Text>
             </TouchableOpacity>
           </View>
@@ -176,7 +265,12 @@ const styles = StyleSheet.create({
   backButton: { marginRight: 10 },
   headerTitle: { fontSize: 18, fontWeight: "bold" },
 
-  section: { backgroundColor: "#fff", padding: 15, borderRadius: 8, marginTop: 10 },
+  section: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 8,
+    marginTop: 10,
+  },
   sectionTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 10 },
 
   cartItem: {
@@ -193,13 +287,29 @@ const styles = StyleSheet.create({
   price: { fontSize: 14, color: "#888" },
   quantityText: { fontSize: 14 },
 
-  addressContainer: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  addressContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   addressText: { fontSize: 14, flex: 1 },
-  changeAddressButton: { backgroundColor: "#3498db", padding: 5, borderRadius: 5 },
+  changeAddressButton: {
+    backgroundColor: "#3498db",
+    padding: 5,
+    borderRadius: 5,
+  },
   changeAddressText: { color: "#fff", fontSize: 14 },
 
-  summaryRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 5 },
-  totalContainer: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 5,
+  },
+  totalContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
   totalText: { fontSize: 16, fontWeight: "bold" },
   totalPrice: { fontSize: 16, fontWeight: "bold", color: "#e74c3c" },
 
@@ -211,27 +321,47 @@ const styles = StyleSheet.create({
     margin: 20,
   },
   checkoutText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  modalContainer: { flex: 1, justifyContent: "center", backgroundColor: "rgba(0,0,0,0.5)" },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
   modalContent: { backgroundColor: "#fff", padding: 20, borderRadius: 10 },
   modalTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 10 },
   voucherItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: "#ddd" },
   closeButton: { marginTop: 10, alignItems: "center" },
   closeButtonText: { color: "#e74c3c" },
-  voucherButton: { 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    padding: 10, 
-    borderWidth: 1, 
-    borderRadius: 5, 
-    borderColor: "#3498db" 
+  voucherButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: "#3498db",
   },
   voucherText: { fontSize: 14, color: "#3498db" },
-  voucherCode: { 
-    fontSize: 16, 
-    fontWeight: "bold", 
-    color: "#27ae60", 
-    textTransform: "uppercase", 
-    marginBottom: 5 
+  voucherCode: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#27ae60",
+    textTransform: "uppercase",
+    marginBottom: 5,
+  },
+  shippingOption: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    marginBottom: 8,
+    backgroundColor: "#f8f8f8",
+  },
+  selectedShipping: {
+    borderColor: "#007bff",
+    backgroundColor: "#e6f0ff",
+  },
+  shippingText: {
+    fontSize: 14,
+    color: "#333",
   },
 });
 

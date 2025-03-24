@@ -51,7 +51,7 @@ const PaymentConfirmationScreen: React.FC = () => {
           📅 Ngày đặt hàng: <Text style={styles.boldText}>{orderDate}</Text>
         </Text>
         <Text style={styles.orderTotal}>
-          💰 Tổng cộng: <Text style={styles.boldText}>{totalAmount}</Text>
+          💰 Tổng cộng: <Text style={styles.boldText}>{totalAmount.toLocaleString()} VNĐ</Text>
         </Text>
       </View>
 

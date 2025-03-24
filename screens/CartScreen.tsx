@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 import { useCart } from "../context/CartContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CartScreen = () => {
   const { cart, updateQuantity, removeFromCart } = useCart();
@@ -18,6 +19,25 @@ const CartScreen = () => {
 
   // State để lưu trạng thái checkbox cho mỗi sản phẩm
   const [checkedItems, setCheckedItems] = useState<Record<number, boolean>>({});
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const userData = await AsyncStorage.getItem("userData");
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUserId(parsedUser._id);
+        }
+      } catch (error) {
+        console.error("Lỗi lấy userId từ AsyncStorage:", error);
+      }
+    };
+    fetchUserId();
+  }, []);
+
+  const userCart = cart.filter((item) => item.userId === userId); // filter cart theo userId
+  
 
   const toggleCheck = (id: number) => {
     setCheckedItems((prev) => ({
@@ -106,7 +126,7 @@ const CartScreen = () => {
   );
 
   // const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalPrice = cart.reduce((sum, item) => {
+  const totalPrice = userCart.reduce((sum, item) => {
     return checkedItems[item.id] ? sum + item.price * item.quantity : sum;
   }, 0);
 
@@ -121,14 +141,14 @@ const CartScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {cart.length === 0 ? (
+      {userCart.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Giỏ hàng của bạn đang trống!</Text>
         </View>
       ) : (
         <>
           <FlatList
-            data={cart}
+            data={userCart}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.listContainer}
@@ -145,7 +165,7 @@ const CartScreen = () => {
             <TouchableOpacity
               style={styles.checkoutButton}
               onPress={() => {
-                const selectedProducts = cart.filter(
+                const selectedProducts = userCart.filter(
                   (item) => checkedItems[item.id]
                 );
                 navigation.navigate("CheckoutScreen", { selectedProducts });

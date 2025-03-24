@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { useCart } from "../context/CartContext"; // Import the useCart hook
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define type for params
 type DetailParamList = {
@@ -57,16 +58,43 @@ const DetailCandle: React.FC = () => {
   };
 
   // Handle "Add to Cart" button press
-  const handleAddToCart = () => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      image: item.image,
-      price: item.price,
-      stock: item.stock,
-      quantity: quantity,
-    });
-    alert(`${item.name} has been added to your cart!`); // Optional: Show a confirmation
+  // const handleAddToCart = () => {
+  //   addToCart({
+  //     id: item.id,
+  //     name: item.name,
+  //     image: item.image,
+  //     price: item.price,
+  //     stock: item.stock,
+  //     quantity: quantity,
+  //   });
+  //   alert(`${item.name} has been added to your cart!`); // Optional: Show a confirmation
+  // };
+  const handleAddToCart = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("userData");
+      if (!userData) {
+        alert("Bạn cần đăng nhập để thêm vào giỏ hàng!");
+        return;
+      }
+  
+      const parsedUserData = JSON.parse(userData);
+      const userId = parsedUserData._id; // Lấy ID người dùng từ AsyncStorage
+  
+      addToCart({
+        id: item.id,
+        userId: userId, // Thêm userId vào cart item
+        name: item.name,
+        image: item.image,
+        price: item.price,
+        stock: item.stock,
+        quantity: quantity,
+      });
+      // console.log("userid: " + userId);
+  
+      alert(`${item.name} đã được thêm vào giỏ hàng!`);
+    } catch (error) {
+      console.error("Lỗi khi lấy UserData từ AsyncStorage:", error);
+    }
   };
 
   // Handle "View Cart" button press
