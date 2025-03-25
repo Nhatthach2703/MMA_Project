@@ -26,8 +26,8 @@ const ChatScreen: React.FC = () => {
                     setMessages(JSON.parse(content));
                 } else {
                     const defaultMessages: Message[] = [
-                        { id: 1, sender: "customer", content: "Hello, I have a question about my order." },
-                        { id: 2, sender: "owner", content: "Hi! How can I assist you?" }
+                        { id: 1, sender: "owner", content: "Hi! How can I assist you?" },
+                        { id: 2, sender: "customer", content: "Hello, I have a question about my order." },
                     ];
                     await FileSystem.writeAsStringAsync(filePath, JSON.stringify(defaultMessages));
                     setMessages(defaultMessages);
@@ -52,7 +52,7 @@ const ChatScreen: React.FC = () => {
         if (newMessage.trim()) {
             const newMessageObj: Message = {
                 id: messages.length + 1,
-                sender: "owner",
+                sender: "customer",
                 content: newMessage,
             };
             const updatedMessages = [...messages, newMessageObj];
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f4f4f4",
     paddingLeft: 20,
     paddingRight: 20,
-    marginTop: 20,
+    // marginTop: 20,
     width: "100%",
   },
   header: {
@@ -126,13 +126,13 @@ const styles = StyleSheet.create({
   },
   ownerMessage: {
     backgroundColor: "#007bff",
-    alignSelf: "flex-end",
-    borderTopRightRadius: 4,
-  },
-  customerMessage: {
-    backgroundColor: "#a9a9a9",
     alignSelf: "flex-start",
     borderTopLeftRadius: 4,
+  },
+  customerMessage: {
+    backgroundColor: "#a9a9a9",    
+    alignSelf: "flex-end",
+    borderTopRightRadius: 4,
   },
   messageText: { color: "#F8F9FA", fontSize: 16 },
   inputContainer: {
