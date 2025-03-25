@@ -22,6 +22,7 @@ import { PaymentConfirmationScreen } from "../screens/PaymentConfirmationScreen"
 import { Ionicons } from "@expo/vector-icons";
 import MapScreen from "../screens/MapScreen";
 import { ChatScreen } from "../screens/ChatScreen";
+import ForgotPassword from "../components/ForgotPassword";
 
 interface UserData {
   name: string;
@@ -41,6 +42,7 @@ type RootStackParamList = {
   PaymentConfirmation: undefined;
   Profile: undefined;
   Register: undefined;
+  ForgotPassword: undefined;
 };
 
 type DrawerParamList = {
@@ -267,6 +269,7 @@ const AppNavigator = () => {
                 <Login {...props} onLoginSuccess={handleLoginSuccess} />
               )}
             />
+            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
             <Stack.Screen name="Register" component={Register} />
             <Stack.Screen name="Main" component={MainDrawer} />
             <Stack.Screen name="DetailCandle" component={DetailCandle} />
