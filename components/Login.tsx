@@ -1,8 +1,16 @@
-import React, { useState, useEffect } from 'react'; // Thêm useEffect
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Config from './config';
+import React, { useState, useEffect } from "react"; // Thêm useEffect
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Config from "./config";
 interface UserData {
   _id?: string;
   name: string;
@@ -20,11 +28,11 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess, navigation, route }) => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   // Lấy email từ route.params khi chuyển từ Register
   useEffect(() => {
@@ -40,58 +48,60 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, navigation, route }) => {
 
   const handleLogin = async () => {
     let valid = true;
-    setEmailError('');
-    setPasswordError('');
+    setEmailError("");
+    setPasswordError("");
 
     if (!email) {
-      setEmailError('Email là bắt buộc');
+      setEmailError("Email là bắt buộc");
       valid = false;
     } else if (!validateEmail(email)) {
-      setEmailError('Định dạng email không hợp lệ');
+      setEmailError("Định dạng email không hợp lệ");
       valid = false;
     }
 
     if (!password) {
-      setPasswordError('Mật khẩu là bắt buộc');
+      setPasswordError("Mật khẩu là bắt buộc");
       valid = false;
     }
 
     if (!valid) return;
 
     try {
-      console.log('Gửi yêu cầu đăng nhập:', { email, password });
+      console.log("Gửi yêu cầu đăng nhập:", { email, password });
       const response = await fetch(`${Config.API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Thông tin đăng nhập không chính xác');
+        throw new Error(
+          errorData.message || "Thông tin đăng nhập không chính xác"
+        );
       }
 
       const data: UserData = await response.json();
-      await AsyncStorage.setItem('userData', JSON.stringify(data));
+      await AsyncStorage.setItem("userData", JSON.stringify(data));
       onLoginSuccess(data);
 
-      navigation.replace('Main');
+      navigation.replace("Main");
     } catch (error: any) {
-      Alert.alert('Lỗi', error.message || 'Đã xảy ra lỗi khi đăng nhập');
+      Alert.alert("Lỗi", error.message || "Đã xảy ra lỗi khi đăng nhập");
     }
   };
 
   const handleNavigateToRegister = () => {
-    navigation.navigate('Register');
+    navigation.navigate("Register");
   };
 
   const handleCancel = () => {
-    setEmail('');
-    setPassword('');
-    setEmailError('');
-    setPasswordError('');
+    setEmail("");
+    setPassword("");
+    setEmailError("");
+    setPasswordError("");
   };
 
   return (
@@ -105,7 +115,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, navigation, route }) => {
         }}
       />
       <View style={styles.inputContainer}>
-        <Ionicons name="mail-outline" size={24} color="#6c757d" style={styles.icon} />
+        <Ionicons
+          name="mail-outline"
+          size={24}
+          color="#6c757d"
+          style={styles.icon}
+        />
         <TextInput
           style={styles.input}
           placeholder="Email"
@@ -118,7 +133,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, navigation, route }) => {
       </View>
       {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
       <View style={styles.inputContainer}>
-        <Ionicons name="lock-closed-outline" size={24} color="#6c757d" style={styles.icon} />
+        <Ionicons
+          name="lock-closed-outline"
+          size={24}
+          color="#6c757d"
+          style={styles.icon}
+        />
         <TextInput
           style={styles.input}
           placeholder="Mật khẩu"
@@ -128,20 +148,35 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, navigation, route }) => {
           secureTextEntry={!showPassword}
         />
         <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-          <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={24} color="#6c757d" />
+          <Ionicons
+            name={showPassword ? "eye-off-outline" : "eye-outline"}
+            size={24}
+            color="#6c757d"
+          />
         </TouchableOpacity>
       </View>
-      {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+      {passwordError ? (
+        <Text style={styles.errorText}>{passwordError}</Text>
+      ) : null}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={handleLogin} style={[styles.button, styles.buttonLogin]}>
+        <TouchableOpacity
+          onPress={handleLogin}
+          style={[styles.button, styles.buttonLogin]}
+        >
           <Text style={styles.buttonText}>Đăng nhập</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleCancel} style={[styles.button, styles.buttonCancel]}>
+        <TouchableOpacity
+          onPress={handleCancel}
+          style={[styles.button, styles.buttonCancel]}
+        >
           <Text style={styles.buttonText}>Huỷ</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity onPress={handleNavigateToRegister}>
         <Text style={styles.link}>Chưa có tài khoản? Đăng ký</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
+        <Text style={styles.link}>Quên mật khẩu?</Text>
       </TouchableOpacity>
     </View>
   );
@@ -217,9 +252,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   errorText: {
-    color: 'red',
+    color: "red",
     fontSize: 12,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     marginLeft: 10,
     marginBottom: 10,
   },
