@@ -89,7 +89,7 @@ const DetailCandle: React.FC = () => {
         stock: item.stock,
         quantity: quantity,
       });
-      // console.log("userid: " + userId);
+      // console.log("name: " + item.name);
   
       alert(`${item.name} đã được thêm vào giỏ hàng!`);
     } catch (error) {
