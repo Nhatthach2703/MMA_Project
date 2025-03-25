@@ -137,19 +137,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (item: CartItem) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
+      const existingItem = prevCart.find(
+        (cartItem) => cartItem.id === item.id && cartItem.userId === item.userId
+      );
+  
       let updatedCart;
-
+  
       if (existingItem) {
         updatedCart = prevCart.map((cartItem) =>
-          cartItem.id === item.id
+          cartItem.id === item.id && cartItem.userId === item.userId
             ? { ...cartItem, quantity: cartItem.quantity + item.quantity }
             : cartItem
         );
       } else {
-        updatedCart = [...prevCart, item];
+        updatedCart = [...prevCart, { ...item}];
       }
-
+  
       saveCart(updatedCart);
       return updatedCart;
     });
