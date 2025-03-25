@@ -146,12 +146,14 @@ const CartScreen = () => {
           <Text style={styles.emptyText}>Giỏ hàng của bạn đang trống!</Text>
         </View>
       ) : (
-        <>
+        <View style={{flex:1}}>
           <FlatList
             data={userCart}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             contentContainerStyle={styles.listContainer}
+            // keyboardShouldPersistTaps="handled"
+            ListFooterComponent={<View style={{ height: 170 }} />}
           />
 
           <View style={styles.footer}>
@@ -174,7 +176,7 @@ const CartScreen = () => {
               <Text style={styles.checkoutText}>Thanh toán</Text>
             </TouchableOpacity>
           </View>
-        </>
+        </View>
       )}
     </SafeAreaView>
   );
