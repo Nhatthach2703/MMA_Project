@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import Config from './config';
+import { useNavigation } from "@react-navigation/native";
 
 interface UserData {
   _id?: string; // Thêm _id để lưu ID người dùng
@@ -17,6 +18,7 @@ interface UserData {
 }
 
 const ProfileScreen: React.FC = () => {
+  const navigation = useNavigation(); 
   const [userData, setUserData] = useState<UserData>({
     name: "",
     email: "",
@@ -27,7 +29,9 @@ const ProfileScreen: React.FC = () => {
     password:"",
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
+
 
   useEffect(() => {
     fetchUserData();
@@ -193,23 +197,6 @@ const handleChangePassword = async () => {
           editable={isEditing}
         />
       </View>
-
-      {/* Password */}
-      {userData.password && (
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.inputField}
-            placeholder="Mật khẩu"
-            value={showPassword ? userData.password : "********"}
-            secureTextEntry={!showPassword}
-            onChangeText={(text) => setUserData({ ...userData, password: text })}
-            editable={isEditing}
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Ionicons name={showPassword ? "eye-off" : "eye"} size={24} color="#6c757d" />
-          </TouchableOpacity>
-        </View>
-      )}
         {/* Address */}
         <View style={styles.inputContainer}>
             <TextInput
@@ -226,21 +213,33 @@ const handleChangePassword = async () => {
     <KeyboardAvoidingView behavior="padding" style={styles.passwordModal}>
       <Text style={styles.modalTitle}>Đổi mật khẩu</Text>
 
-      <TextInput
-        style={styles.inputField1}
-        placeholder="Mật khẩu hiện tại"
-        secureTextEntry
-        value={currentPassword}
-        onChangeText={setCurrentPassword}
-      />
+      {/* Mật khẩu hiện tại */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.inputField}
+          placeholder="Mật khẩu hiện tại"
+          secureTextEntry={!showCurrentPassword}
+          value={currentPassword}
+          onChangeText={setCurrentPassword}
+        />
+        <TouchableOpacity onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
+          <Ionicons name={showCurrentPassword ? "eye" : "eye-off"} size={24} color="gray" />
+        </TouchableOpacity>
+      </View>
 
-      <TextInput
-        style={styles.inputField1}
-        placeholder="Mật khẩu mới"
-        secureTextEntry
-        value={newPassword}
-        onChangeText={setNewPassword}
-      />
+      {/* Mật khẩu mới */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.inputField}
+          placeholder="Mật khẩu mới"
+          secureTextEntry={!showNewPassword}
+          value={newPassword}
+          onChangeText={setNewPassword}
+        />
+        <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
+          <Ionicons name={showNewPassword ? "eye" : "eye-off"} size={24} color="gray" />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.modalButtonContainer}>
         <TouchableOpacity 
@@ -264,6 +263,7 @@ const handleChangePassword = async () => {
 
 
 
+
       {/* Buttons */}
       <View style={styles.buttonContainer}>
       <TouchableOpacity 
@@ -274,7 +274,7 @@ const handleChangePassword = async () => {
 </TouchableOpacity>
 
 
-        <TouchableOpacity style={[styles.button, styles.backButton]}>
+        <TouchableOpacity style={[styles.button, styles.backButton]}  onPress={() => navigation.goBack()}>
           <Text style={styles.buttonText}>Quay lại</Text>
         </TouchableOpacity>
         {isEditing ? (
