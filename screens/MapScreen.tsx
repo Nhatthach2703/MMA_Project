@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, StatusBar, TextInput, Alert, TouchableOpacity, Button } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
 const SHOP_LOCATION = {
   latitude: 16.0718,
@@ -13,6 +14,7 @@ const MapScreen: React.FC = () => {
   const [inputAddress, setInputAddress] = useState<string>('');
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [routeCoordinates, setRouteCoordinates] = useState<{ latitude: number; longitude: number }[]>([]);
+  const navigation = useNavigation();
 
   const getCoordinatesFromAddress = async (address: string): Promise<{ latitude: number; longitude: number } | null> => {
     try {
@@ -76,7 +78,7 @@ const MapScreen: React.FC = () => {
         <TouchableOpacity style={styles.button} onPress={handleNavigate}>
           <Text style={styles.buttonText}>🚀 Chỉ đường</Text>
         </TouchableOpacity>
-        <Button title="Back" onPress={() => {}} />
+        <Button title="Back" onPress={() => navigation.goBack()} />
       </View>
     </View>
   );

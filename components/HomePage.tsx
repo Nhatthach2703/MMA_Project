@@ -10,9 +10,11 @@ import {
   Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { DrawerActions } from "@react-navigation/native";
+import { DrawerActions, RouteProp, useRoute } from "@react-navigation/native";
 import { LinearGradient } from 'expo-linear-gradient';
 import Config from './config';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useCart } from "../context/CartContext";
 
 interface Candle {
   id: number;
@@ -133,6 +135,45 @@ const HomeScreen = ({ navigation }) => {
     Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true }).start();
   };
 
+  // Thêm sp vao giỏ hàng
+  const { addToCart } = useCart();
+  const handleAddToCart = async (candle: Candle) => {
+    try {
+      const userData = await AsyncStorage.getItem("userData");
+      if (!userData) {
+        Alert.alert("Thông báo", "Bạn cần đăng nhập để thêm vào giỏ hàng!");
+        return;
+      }
+
+      const parsedUserData = JSON.parse(userData);
+      const userId = parsedUserData._id;
+      // console.log("userid: " + userId);
+
+      addToCart({
+        id: candle.id,
+        userId: userId,
+        name: candle.name,
+        image: candle.image,
+        price: candle.price,
+        stock: candle.stock,
+        quantity: 1,
+      });
+      // console.log("Adding to cart:", {
+      //   id: candle.id,
+      //   userId,
+      //   name: candle.name,
+      //   image: candle.image,
+      //   price: candle.price,
+      //   stock: candle.stock,
+      //   quantity: 1,
+      // });
+
+      Alert.alert("Thông báo", `${candle.name} đã được thêm vào giỏ hàng!`);
+    } catch (error) {
+      console.error("Lỗi khi lấy UserData từ AsyncStorage:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -189,7 +230,7 @@ const HomeScreen = ({ navigation }) => {
                 }}
               >
                 {candles.map((candle) => (
-                  <View key={candle.id} style={styles.productCard}>
+                    <View key={candle.id} style={styles.productCard}>
                     <Image source={{ uri: candle.image }} style={styles.productImage} />
                     <Text style={styles.productName}>{candle.name}</Text>
                     <Text style={styles.productPrice}>
@@ -197,11 +238,11 @@ const HomeScreen = ({ navigation }) => {
                     </Text>
                     <TouchableOpacity
                       style={styles.addButton}
-                      onPress={() => Alert.alert("Thông báo", `Đã thêm ${candle.name} vào giỏ hàng!`)}
+                      onPress={() => handleAddToCart(candle)}
                     >
                       <Ionicons name="cart-outline" size={20} color="#ff9800" />
                     </TouchableOpacity>
-                  </View>
+                    </View>
                 ))}
               </Animated.View>
             </ScrollView>
