@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View,KeyboardAvoidingView  } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
@@ -24,6 +24,7 @@ const ProfileScreen: React.FC = () => {
     dob: "",
     avatar: "",
     address: "",
+    password:"",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -97,6 +98,45 @@ const ProfileScreen: React.FC = () => {
       setUserData({ ...userData, avatar: result.assets[0].uri });
     }
   };
+
+
+  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
+const [currentPassword, setCurrentPassword] = useState("");
+const [newPassword, setNewPassword] = useState("");
+
+
+const handleChangePassword = async () => {
+  try {
+    const userId = userData._id;
+    if (!userId) {
+      alert("Lỗi: Không tìm thấy ID người dùng!");
+      return;
+    }
+
+    const response = await fetch(`${Config.API_BASE_URL}/api/auth/change-password/${userId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Lỗi khi đổi mật khẩu");
+    }
+
+    alert("Mật khẩu đã được cập nhật!");
+    setIsPasswordModalVisible(false);
+    setCurrentPassword("");
+    setNewPassword("");
+  } catch (error) {
+    alert("Mật khẩu hiện tại không đúng hoặc có lỗi xảy ra.");
+  }
+};
+
+
+
 
   return (
     <View style={styles.container}>
@@ -181,9 +221,59 @@ const ProfileScreen: React.FC = () => {
             />
         </View>
       {/* Address */}
+      {isPasswordModalVisible && (
+  <View style={styles.overlay}>
+    <KeyboardAvoidingView behavior="padding" style={styles.passwordModal}>
+      <Text style={styles.modalTitle}>Đổi mật khẩu</Text>
+
+      <TextInput
+        style={styles.inputField1}
+        placeholder="Mật khẩu hiện tại"
+        secureTextEntry
+        value={currentPassword}
+        onChangeText={setCurrentPassword}
+      />
+
+      <TextInput
+        style={styles.inputField1}
+        placeholder="Mật khẩu mới"
+        secureTextEntry
+        value={newPassword}
+        onChangeText={setNewPassword}
+      />
+
+      <View style={styles.modalButtonContainer}>
+        <TouchableOpacity 
+          style={styles.cancelButton} 
+          onPress={() => setIsPasswordModalVisible(false)}
+        >
+          <Text style={styles.buttonText}>Hủy</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.saveButton1} 
+          onPress={handleChangePassword}
+        >
+          <Text style={styles.buttonText}>Lưu</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+  </View>
+)}
+
+
+
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
+      <TouchableOpacity 
+  style={[styles.button, styles.changePasswordButton]} 
+  onPress={() => setIsPasswordModalVisible(true)}
+>
+  <Text style={styles.buttonText}>Đổi mật khẩu</Text>
+</TouchableOpacity>
+
+
         <TouchableOpacity style={[styles.button, styles.backButton]}>
           <Text style={styles.buttonText}>Quay lại</Text>
         </TouchableOpacity>
@@ -277,6 +367,76 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Làm mờ nền
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+  },
+  
+  passwordModal: {
+    width: "100%",
+    height:"100%", // Tăng chiều rộng modal
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    alignItems: "center",
+  },
+  
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+  
+  inputField1: {
+    width: "100%",
+    height: 45,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 8,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "#fff",
+  },
+  
+  modalButtonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 10,
+  },
+  
+  cancelButton: {
+    backgroundColor: "#808080",
+    flex: 1,
+    marginRight: 10,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  
+  saveButton1: {
+    backgroundColor: "green",
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  changePasswordButton: {
+    backgroundColor: "orange", // Màu nền của nút
+  },
+  
 });
 
 export default ProfileScreen;
