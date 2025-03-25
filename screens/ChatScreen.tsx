@@ -71,7 +71,7 @@ const ChatScreen: React.FC = () => {
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <Image source={{ uri: "https://www.shareicon.net/data/512x512/2016/05/24/770137_man_512x512.png" }} style={styles.avatar} />
-                <Text style={styles.headerTitle}>Customer</Text>
+                <Text style={styles.headerTitle}>Admin</Text>
             </View>
 
             {/* Chat Messages */}
