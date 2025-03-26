@@ -191,9 +191,14 @@ const Register: React.FC<RegisterProps> = ({ navigation }) => {
       </View>
       {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
       
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Đăng ký</Text>
-      </TouchableOpacity>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={[styles.button, styles.buttonLogin]} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Đăng ký</Text>
+        </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, styles.buttonCancel]} onPress={() => navigation.goBack()}>
+          <Text style={styles.buttonText}>Quay lại</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -240,11 +245,19 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   button: {
-    backgroundColor: "#007bff",
+    // backgroundColor: "#007bff",
+    // padding: 12,
+    // borderRadius: 8,
+    // marginTop: 10,
+    // width: "100%",
+    flex: 1,
+    alignContent: "center",
     padding: 12,
     borderRadius: 8,
-    marginTop: 10,
-    width: "100%",
+    marginHorizontal: 8,
+  },
+  buttonLogin: {
+    backgroundColor: "#007bff",
   },
   buttonText: {
     color: "#fff",
@@ -257,6 +270,15 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginLeft: 10,
     marginBottom: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 16,
+  },
+  buttonCancel: {
+    backgroundColor: "red",
   },
 });
 

@@ -165,12 +165,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, navigation, route }) => {
         >
           <Text style={styles.buttonText}>Đăng nhập</Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={handleCancel}
           style={[styles.button, styles.buttonCancel]}
         >
           <Text style={styles.buttonText}>Huỷ</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <TouchableOpacity onPress={handleNavigateToRegister}>
         <Text style={styles.link}>Chưa có tài khoản? Đăng ký</Text>

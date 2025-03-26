@@ -26,8 +26,8 @@ const ChatScreen: React.FC = () => {
                     setMessages(JSON.parse(content));
                 } else {
                     const defaultMessages: Message[] = [
-                        { id: 1, sender: "owner", content: "Hi! How can I assist you?" },
-                        { id: 2, sender: "customer", content: "Hello, I have a question about my order." },
+                        { id: 1, sender: "owner", content: "Xin chào!, mình có thể giúp gì cho bạn ạ?" },
+                        { id: 2, sender: "customer", content: "Mình cần tham khảo về sản phẩm nên Lavender ạ" },
                     ];
                     await FileSystem.writeAsStringAsync(filePath, JSON.stringify(defaultMessages));
                     setMessages(defaultMessages);
