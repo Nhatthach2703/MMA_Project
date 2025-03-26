@@ -118,7 +118,6 @@ const CheckoutScreen: React.FC = () => {
         >
           <Ionicons name="arrow-back" size={24} color="#343a40" />
         </TouchableOpacity>
-        {/* <Text style={styles.headerTitle}>Xác nhận đơn hàng</Text> */}
       </View>
 
       <ScrollView style={styles.scrollContainer}>
